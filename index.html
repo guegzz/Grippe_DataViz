@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <style>
+    .hidden {
+      display: none;
+    }
+
+    div.tooltip {
+      color: #222;
+      background-color: #fff;
+      padding: .5em;
+      text-shadow: #f5f5f5 0 1px 0;
+      border-radius: 2px;
+      opacity: 0.9;
+      position: absolute;
+    }
+
+    body {
+      margin: 0;
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+    }
+
+    .region {
+      fill: #000;
+      stroke: #fff;
+      stroke-width: 1px;
+    }
+
+    .region:hover {
+      fill: white;
+    }
+
+
+.slider-wrapper input {
+  width: 180px;
+  height: 20px;
+  position : relative;
+
+}
+
+.spanner {
+  position:relative;
+  margin-top:20px;
+  margin-left: 20px;
+}
+
+div {
+    display: -webkit-flex; /* Safari */
+    -webkit-align-items: center; /* Safari 7.0+ */
+    display: flex;
+    align-items: center;
+}
+.slider-wrapper{
+  width: 700px;
+  height: 60px;
+
+}
+
+  </style>
+</head>
+
+<body>
+  <div class="slider-wrapper">
+    <input id="slider" type="range" value="1" min="1" max="52" step="1" />
+    <span class="spanner" id="week"></span>
+  </div>
+  <script>
+    var width = 700,
+      height = 580;
+
+    var svg = d3.select("body")
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height);
+
+    var projection = d3.geoConicConformal().center([2.454071, 46.279229]).scale(2800)
+      .translate([width / 2, height / 2]);
+
+    var path = d3.geoPath() // d3.geo.path avec d3 version 3
+      .projection(projection);
+
+
+    d3.csv("GrippeFrance2014.csv", function(data) {
+
+      d3.json("geo.json", function(json) {
+        svg.selectAll(".region")
+          .data(json.features)
+          .enter()
+          .append("path")
+          .attr('class', 'region')
+          .attr("d", path);
+
+
+        var tooltip = d3.select('body').append('div')
+          .attr('class', 'hidden tooltip');
+
+        dict = {}
+        //On initalise tout max, texte, slider à la semaine 1
+        var max = d3.max(data, function(d, i) {
+          return +d[Object.keys(data[0])[1]];
+        })
+
+        d3.select("#slider").property("value", 1);
+        d3.select("#week").text("Semaine du: " + Object.keys(data[0])[1]);
+
+        var colorScale = d3.scaleLinear().domain([0, max]).interpolate(d3.interpolateHcl).range(['#FFCDD2', '#B71C1C']);
+
+        function valueByWeek(numWeek) {
+          var max = d3.max(data, function(d, i) {
+            return +d[Object.keys(data[0])[numWeek]];
+          })
+
+          colorScale = d3.scaleLinear().domain([0, max]).interpolate(d3.interpolateHcl).range(['#FFCDD2', '#B71C1C']);
+
+          for (var i = 0; i < data.length; i++) {
+            json.features.forEach(function(element) {
+              if (element.properties.nom == data[i].region) {
+                element.properties.value = data[i][Object.keys(data[0])[numWeek]]
+              }
+            })
+
+            sum = 0
+            sum += parseFloat(data[i][Object.keys(data[i])[numWeek]])
+            dict[data[i]["region"]] = sum
+          }
+          Draw();
+        };
+
+
+        valueByWeek(1);
+        d3.select("#slider").on("input", function(d) {
+          // adjust the text on the range slider
+          d3.select("#week").text("Semaine du: " + Object.keys(data[0])[+this.value]);
+          valueByWeek(+this.value)
+        });
+
+
+        function Draw() {
+
+          svg.selectAll(".region")
+            .style("fill", function(d) {
+
+              return colorScale(d.properties.value)
+
+            })
+            .on('mouseover', function(d) {
+              d3.select(this).style("fill", function(d) {
+
+                  return colorScale(d.properties.value)
+
+                })
+                .style("opacity", 0.5)
+            })
+            .on('mousemove', function(d) {
+              var mouse = d3.mouse(svg.node()).map(function(d) {
+                return parseInt(d);
+              });
+              tooltip.classed('hidden', false)
+                .attr('style', 'left:' + (mouse[0] + 15) +
+                  'px; top:' + (mouse[1] - 35) + "px;")
+                .html("<b>" + d.properties.nom + "</b>" + ':\n' + dict[d.properties.nom]);
+            })
+            .on('mouseout', function() {
+              tooltip.classed('hidden', true);
+              d3.select(this).style("fill", function(d) {
+
+                return colorScale(d.properties.value)
+              }).style("opacity", 1)
+            });
+        }
+
+        /*svg.selectAll("text")
+          .data(json.features)
+          .enter()
+          .append("text")
+          .text(function(d, i) {
+            return dict[d.properties.nom]
+          })
+          .attr("x", function(d) {
+            return path.centroid(d)[0];
+          })
+          .attr("y", function(d) {
+            return path.centroid(d)[1];
+          })
+          .attr("text-anchor", "middle")
+          .attr('font-size', '6pt');*/
+
+
+
+
+      });
+    });
+  </script>
+</body>
