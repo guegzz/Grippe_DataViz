@@ -20,6 +20,8 @@
     }
 
     body {
+      display: flex;
+      flex-direction: column;
       margin: 0;
       position: fixed;
       top: 0;
@@ -38,45 +40,61 @@
 
     .slider-wrapper input {
       width: 180px;
-      height: 20px;
+      height: 10px;
       position: relative;
 
     }
 
     .spanner {
-      margin-top: 10px;
-      margin-bottom: : 10px;
+      margin-top: 5px;
+      margin-bottom: : 5px;
       font-weight: bold;
     }
 
     div {
-      display: -webkit-flex;
-      /* Safari */
-      -webkit-align-items: center;
-      /* Safari 7.0+ */
       display: flex;
       align-items: center;
     }
 
     .slider-wrapper {
       width: 700px;
-      height: 60px;
+      height: 45px;
       display: flex;
       flex-direction: column;
 
     }
+
+    defs {
+      -webkit-align-items: center;
+      justify-content: center;
+    }
+
   </style>
 </head>
 
 <body>
   <div class="slider-wrapper">
-    <span class="spanner" id="weeks">Les cas de grippe en France en 2014</span>
     <span class="spanner" id="week"></span>
     <input id="slider" type="range" value="1" min="1" max="52" step="1" />
   </div>
   <script>
     var width = 700,
       height = 580;
+
+      var svg1 = d3.select("body")
+        .append("svg")
+        .attr("id","colorlegend")
+        .attr("width", width)
+        .attr("height", 20);
+
+      svg1.append("text")
+        .style("fill","black")
+        .attr("postion","relative")
+        .style("font-weight","bold")
+        .attr("text-anchor", "middle")
+        .attr('font-size', '8pt')
+        .attr("x",width/2+162)
+        .attr("y",18)
 
     var svg = d3.select("body")
       .append("svg")
@@ -100,6 +118,35 @@
           .attr('class', 'region')
           .attr("d", path);
 
+          //Append a defs (for definition) element to your SVG
+          var defs = svg.append("defs");
+
+          //Append a linearGradient element to the defs and give it a unique id
+          var linearGradient = defs.append("linearGradient")
+          .attr("id", "linear-gradient");
+
+          //Set the color for the start (0%)
+          linearGradient.append("stop")
+          .attr("offset", "0%")
+          .attr("stop-color", "#FFCDD2"); //light blue
+
+          //Set the color for the end (100%)
+          linearGradient.append("stop")
+          .attr("offset", "100%")
+          .attr("stop-color", "#B71C1C"); //dark blue
+
+          //Draw the rectangle and fill with gradient
+
+
+          svg1.append("rect")
+	         .attr("width", 300)
+	          .attr("height", 10)
+	           .style("fill", "url(#linear-gradient)")
+             .attr("x",width/2-150)
+             .attr('y',10)
+             ;
+
+
 
         var tooltip = d3.select('body').append('div')
           .attr('class', 'hidden tooltip');
@@ -111,7 +158,7 @@
         })
 
         d3.select("#slider").property("value", 1);
-        d3.select("#week").text("Semaine du: " + Object.keys(data[0])[1]);
+        d3.select("#week").text("Semaine du " + Object.keys(data[0])[1]);
 
         var colorScale = d3.scaleLinear().domain([0, max]).interpolate(d3.interpolateHcl).range(['#FFCDD2', '#B71C1C']);
 
@@ -133,6 +180,8 @@
             sum += parseFloat(data[i][Object.keys(data[i])[numWeek]])
             dict[data[i]["region"]] = sum
           }
+          svg1.select("text")
+          .text(max)
 
           Draw();
         };
@@ -141,12 +190,13 @@
         valueByWeek(1);
         d3.select("#slider").on("input", function(d) {
           // adjust the text on the range slider
-          d3.select("#week").text("Semaine du: " + Object.keys(data[0])[+this.value]);
+          d3.select("#week").text("Semaine du " + Object.keys(data[0])[+this.value]);
           valueByWeek(+this.value)
         });
 
 
         function Draw() {
+
 
           svg.selectAll(".region")
             .style("fill", function(d) {
