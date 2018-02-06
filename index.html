@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <script src="https://d3js.org/d3.v4.min.js"></script>
   <style>
+
     .hidden {
       display: none;
     }
@@ -33,36 +34,35 @@
       stroke-width: 1px;
     }
 
-    .region:hover {
-      fill: white;
+
+
+    .slider-wrapper input {
+      width: 180px;
+      height: 20px;
+      position: relative;
+
     }
 
+    .spanner {
+      position: relative;
+      margin-top: 20px;
+      margin-left: 20px;
+    }
 
-.slider-wrapper input {
-  width: 180px;
-  height: 20px;
-  position : relative;
+    div {
+      display: -webkit-flex;
+      /* Safari */
+      -webkit-align-items: center;
+      /* Safari 7.0+ */
+      display: flex;
+      align-items: center;
+    }
 
-}
+    .slider-wrapper {
+      width: 700px;
+      height: 60px;
 
-.spanner {
-  position:relative;
-  margin-top:20px;
-  margin-left: 20px;
-}
-
-div {
-    display: -webkit-flex; /* Safari */
-    -webkit-align-items: center; /* Safari 7.0+ */
-    display: flex;
-    align-items: center;
-}
-.slider-wrapper{
-  width: 700px;
-  height: 60px;
-
-}
-
+    }
   </style>
 </head>
 
@@ -103,7 +103,7 @@ div {
 
         dict = {}
         //On initalise tout max, texte, slider à la semaine 1
-        var max = d3.max(data, function(d, i) {
+        var max = d3.max(data, function(d) {
           return +d[Object.keys(data[0])[1]];
         })
 
@@ -113,7 +113,7 @@ div {
         var colorScale = d3.scaleLinear().domain([0, max]).interpolate(d3.interpolateHcl).range(['#FFCDD2', '#B71C1C']);
 
         function valueByWeek(numWeek) {
-          var max = d3.max(data, function(d, i) {
+          var max = d3.max(data, function(d) {
             return +d[Object.keys(data[0])[numWeek]];
           })
 
@@ -130,6 +130,7 @@ div {
             sum += parseFloat(data[i][Object.keys(data[i])[numWeek]])
             dict[data[i]["region"]] = sum
           }
+
           Draw();
         };
 
@@ -163,8 +164,8 @@ div {
                 return parseInt(d);
               });
               tooltip.classed('hidden', false)
-                .attr('style', 'left:' + (mouse[0] + 15) +
-                  'px; top:' + (mouse[1] - 35) + "px;")
+                .attr('style', 'left:' + (mouse[0] + 5) +
+                  'px; top:' + (mouse[1] - 5) + "px;")
                 .html("<b>" + d.properties.nom + "</b>" + ':\n' + dict[d.properties.nom]);
             })
             .on('mouseout', function() {
@@ -172,6 +173,7 @@ div {
               d3.select(this).style("fill", function(d) {
 
                 return colorScale(d.properties.value)
+
               }).style("opacity", 1)
             });
         }
