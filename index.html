@@ -4,7 +4,6 @@
   <meta charset="utf-8">
   <script src="https://d3js.org/d3.v4.min.js"></script>
   <style>
-
     .hidden {
       display: none;
     }
@@ -68,7 +67,6 @@
       -webkit-align-items: center;
       justify-content: center;
     }
-
   </style>
 </head>
 
@@ -81,20 +79,31 @@
     var width = 700,
       height = 580;
 
-      var svg1 = d3.select("body")
-        .append("svg")
-        .attr("id","colorlegend")
-        .attr("width", width)
-        .attr("height", 20);
+    var svg1 = d3.select("body")
+      .append("svg")
+      .attr("id", "colorlegend")
+      .attr("width", width)
+      .attr("height", 20);
+
+    svg1.append("text")
+      .attr('id','textmax')
+      .style("fill", "black")
+      .attr("postion", "relative")
+      .style("font-weight", "bold")
+      .attr("text-anchor", "middle")
+      .attr('font-size', '8pt')
+      .attr("x", width / 2 + 162)
+      .attr("y", 18)
 
       svg1.append("text")
-        .style("fill","black")
-        .attr("postion","relative")
-        .style("font-weight","bold")
+        .attr("id",'textmin')
+        .style("fill", "black")
+        .attr("postion", "relative")
+        .style("font-weight", "bold")
         .attr("text-anchor", "middle")
         .attr('font-size', '8pt')
-        .attr("x",width/2+162)
-        .attr("y",18)
+        .attr("x", width / 2 - 162)
+        .attr("y", 18)
 
     var svg = d3.select("body")
       .append("svg")
@@ -118,35 +127,30 @@
           .attr('class', 'region')
           .attr("d", path);
 
-          //Append a defs (for definition) element to your SVG
-          var defs = svg.append("defs");
+        //Append a defs (for definition) element to your SVG
+        var defs = svg.append("defs");
 
-          //Append a linearGradient element to the defs and give it a unique id
-          var linearGradient = defs.append("linearGradient")
+        //Append a linearGradient element to the defs and give it a unique id
+        var linearGradient = defs.append("linearGradient")
           .attr("id", "linear-gradient");
 
-          //Set the color for the start (0%)
-          linearGradient.append("stop")
+        //Set the color for the start (0%)
+        linearGradient.append("stop")
           .attr("offset", "0%")
           .attr("stop-color", "#FFCDD2"); //light blue
 
-          //Set the color for the end (100%)
-          linearGradient.append("stop")
+        //Set the color for the end (100%)
+        linearGradient.append("stop")
           .attr("offset", "100%")
           .attr("stop-color", "#B71C1C"); //dark blue
 
-          //Draw the rectangle and fill with gradient
-
-
-          svg1.append("rect")
-	         .attr("width", 300)
-	          .attr("height", 10)
-	           .style("fill", "url(#linear-gradient)")
-             .attr("x",width/2-150)
-             .attr('y',10)
-             ;
-
-
+        //Draw the rectangle and fill with gradient
+        svg1.append("rect")
+          .attr("width", 300)
+          .attr("height", 10)
+          .style("fill", "url(#linear-gradient)")
+          .attr("x", width / 2 - 150)
+          .attr('y', 10);
 
         var tooltip = d3.select('body').append('div')
           .attr('class', 'hidden tooltip');
@@ -157,6 +161,10 @@
           return +d[Object.keys(data[0])[1]];
         })
 
+        var min = d3.min(data, function(d) {
+          return +d[Object.keys(data[0])[1]];
+        })
+
         d3.select("#slider").property("value", 1);
         d3.select("#week").text("Semaine du " + Object.keys(data[0])[1]);
 
@@ -164,6 +172,10 @@
 
         function valueByWeek(numWeek) {
           var max = d3.max(data, function(d) {
+            return +d[Object.keys(data[0])[numWeek]];
+          })
+
+          var min = d3.min(data, function(d) {
             return +d[Object.keys(data[0])[numWeek]];
           })
 
@@ -180,8 +192,11 @@
             sum += parseFloat(data[i][Object.keys(data[i])[numWeek]])
             dict[data[i]["region"]] = sum
           }
-          svg1.select("text")
-          .text(max)
+          svg1.select("#textmax")
+            .text(max)
+
+            svg1.select("#textmin")
+              .text(min)
 
           Draw();
         };
@@ -246,9 +261,6 @@
           })
           .attr("text-anchor", "middle")
           .attr('font-size', '6pt');*/
-
-
-
 
       });
     });
