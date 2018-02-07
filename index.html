@@ -189,6 +189,9 @@
                 element.properties.value = data[i][Object.keys(data[0])[numWeek]]
               }
             })
+            //Au départ j'ai utilisé un dictionnaire pour stocker un calcul intermédiaire, pour chaque région la somme des semaines de novembre
+            //Avec un if sur les clés du tableau csv, qui s'ajoutent dans la variable sum si elles contiennent "11/14"
+            //Je les gardais pour la fin du projet mais il n'est pas utile.
 
             sum = 0
             sum += parseFloat(data[i][Object.keys(data[i])[numWeek]])
