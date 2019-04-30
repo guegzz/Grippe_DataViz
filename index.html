@@ -9,11 +9,15 @@
     }
 
     div.tooltip {
+      text-align: center;
+      border-right: solid 0px;
+      width: auto;
+      height: auto;
       color: #222;
       background-color: #fff;
       padding: .5em;
       text-shadow: #f5f5f5 0 1px 0;
-      border-radius: 2px;
+      border-radius: 8px;
       opacity: 0.9;
       position: absolute;
     }
@@ -29,244 +33,1082 @@
       left: 0;
     }
 
-    .region {
+    .departement {
       fill: #000;
       stroke: #fff;
-      stroke-width: 1px;
+      stroke-width: 0px;
     }
 
-
-
-    .slider-wrapper input {
-      width: 180px;
-      height: 10px;
-      position: relative;
-
-    }
-
-    .spanner {
-      margin-top: 5px;
-      margin-bottom: : 5px;
-      font-weight: bold;
-    }
 
     div {
+      border-right: solid 0.5px;
+      border-color: white;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
       display: flex;
+      flex-direction: line;
+    }
+
+    div#right {
+      width: 50%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    div#left {
+      width: 50%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    div#radios {
+      background-color: #212121;
+      width: 100%;
+      height: 10%;
+      display: flex;
+      flex-direction: line;
+      border-right: : solid 0px;
       align-items: center;
     }
 
-    .slider-wrapper {
-      width: 700px;
-      height: 45px;
-      display: flex;
+    svg {
       flex-direction: column;
-
+      background-color: #212121;
     }
 
-    defs {
-      -webkit-align-items: center;
-      justify-content: center;
+
+    svg#scatter {
+      background-color: none;
     }
+
+    svg#carte {
+      background-color: none;
+    }
+
+    svg#histogramme {
+      background-color: none;
+      border-bottom: solid 0.5px;
+      border-color: white;
+    }
+
+    .legend {
+		position: fixed;
+		bottom: 20px;
+		left: 20px;
+		background-color: transparent;
+	}
+
+    #xAxis,
+    #yAxis line,
+    #yAxis_legend line {
+      stroke: #CFD8DC;
+    }
+
+    #xAxis,
+    #yAxis path,
+    #yAxis_legend path {
+      stroke: #CFD8DC;
+    }
+
+    #xAxis,
+    #yAxis text,
+    #yAxis_legend text {
+      fill: #CFD8DC;
+    }
+
+    .radio-toolbar input[type="radio"]:checked~* {
+      color: #CFD8DC;
+      font-weight: bold;
+    }
+
+    #radios label {
+      color: #CFD8DC;
+    }
+
   </style>
 </head>
 
 <body>
-  <div class="slider-wrapper">
-    <span class="spanner" id="week"></span>
-    <input id="slider" type="range" value="1" min="1" max="52" step="1" />
+  <div>
+    <div id='left'>
+      <div class='radio-toolbar' id='radios'>
+        <label>
+      <input type="radio" name="filiere" value="Option1" checked='true'/>
+        </label>
+        <label>
+      <input type="radio" name="filiere" value="Option2"  />
+        </label>
+        <label>
+      <input type="radio" name="filiere" value="Option3" />
+        </label>
+        <label>
+      <input type="radio" name="filiere" value="Option4" />
+        </label>
+      </div>
+      <svg id="carte"></svg>
+    </div>
+    <div id="right">
+      <svg id='histogramme'></svg>
+      <svg id='scatter'></svg>
+    </div>
   </div>
+
   <script>
-    var width = 700,
-      height = 580;
+    filiere = "TFC"
+    depFr = {};
+    depFr["01"] = "Ain";
+    depFr["02"] = "Aisne";
+    depFr["03"] = "Allier";
+    depFr["04"] = "Alpes-de-Haute-Provence";
+    depFr["06"] = "Alpes-Maritimes";
+    depFr["07"] = "Ardèche";
+    depFr["08"] = "Ardennes";
+    depFr["09"] = "Ariège";
+    depFr["10"] = "Aube";
+    depFr["11"] = "Aude";
+    depFr["12"] = "Aveyron";
+    depFr["67"] = "Bas-Rhin";
+    depFr["13"] = "Bouches-du-Rhône";
+    depFr["14"] = "Calvados";
+    depFr["15"] = "Cantal";
+    depFr["16"] = "Charente";
+    depFr["17"] = "Charente-Maritime";
+    depFr["18"] = "Cher";
+    depFr["19"] = "Corrèze";
+    depFr["2A"] = "Corse-du-Sud";
+    depFr["21"] = "Côte-d'Or";
+    depFr["22"] = "Côtes-d'Armor";
+    depFr["23"] = "Creuse";
+    depFr["79"] = "Deux-Sèvres";
+    depFr["24"] = "Dordogne";
+    depFr["25"] = "Doubs";
+    depFr["26"] = "Drôme";
+    depFr["91"] = "Essonne";
+    depFr["27"] = "Eure";
+    depFr["28"] = "Eure-et-Loir";
+    depFr["29"] = "Finistère";
+    depFr["30"] = "Gard";
+    depFr["32"] = "Gers";
+    depFr["33"] = "Gironde";
+    depFr["05"] = "Hautes-Alpes";
+    depFr["65"] = "Hautes-Pyrénées";
+    depFr["2B"] = "Haute-Corse";
+    depFr["31"] = "Haute-Garonne";
+    depFr["43"] = "Haute-Loire";
+    depFr["52"] = "Haute-Marne";
+    depFr["70"] = "Haute-Saône";
+    depFr["74"] = "Haute-Savoie";
+    depFr["87"] = "Haute-Vienne";
+    depFr["92"] = "Hauts-de-Seine";
+    depFr["68"] = "Haut-Rhin";
+    depFr["34"] = "Hérault";
+    depFr["35"] = "Ille-et-Vilaine";
+    depFr["36"] = "Indre";
+    depFr["37"] = "Indre-et-Loire";
+    depFr["38"] = "Isère";
+    depFr["39"] = "Jura";
+    depFr["40"] = "Landes";
+    depFr["42"] = "Loire";
+    depFr["45"] = "Loiret";
+    depFr["44"] = "Loire-Atlantique";
+    depFr["41"] = "Loir-et-Cher";
+    depFr["46"] = "Lot";
+    depFr["47"] = "Lot-et-Garonne";
+    depFr["48"] = "Lozère";
+    depFr["49"] = "Maine-et-Loire";
+    depFr["50"] = "Manche";
+    depFr["51"] = "Marne";
+    depFr["53"] = "Mayenne";
+    depFr["54"] = "Meurthe-et-Moselle";
+    depFr["55"] = "Meuse";
+    depFr["56"] = "Morbihan";
+    depFr["57"] = "Moselle";
+    depFr["58"] = "Nièvre";
+    depFr["59"] = "Nord";
+    depFr["60"] = "Oise";
+    depFr["61"] = "Orne";
+    depFr["75"] = "Paris";
+    depFr["62"] = "Pas-de-Calais";
+    depFr["63"] = "Puy-de-Dôme";
+    depFr["64"] = "Pyrénées-Atlantiques";
+    depFr["66"] = "Pyrénées-Orientales";
+    depFr["69"] = "Rhône";
+    depFr["71"] = "Saône-et-Loire";
+    depFr["72"] = "Sarthe";
+    depFr["73"] = "Savoie";
+    depFr["93"] = "Seine-Saint-Denis";
+    depFr["76"] = "Seine-Maritime";
+    depFr["77"] = "Seine-et-Marne";
+    depFr["80"] = "Somme";
+    depFr["81"] = "Tarn";
+    depFr["82"] = "Tarn-et-Garonne";
+    depFr["90"] = "Territoire de Belfort";
+    depFr["94"] = "Val-de-Marne";
+    depFr["95"] = "Val-d'Oise";
+    depFr["83"] = "Var";
+    depFr["84"] = "Vaucluse";
+    depFr["85"] = "Vendée";
+    depFr["86"] = "Vienne";
+    depFr["88"] = "Vosges";
+    depFr["89"] = "Yonne";
+    depFr["78"] = "Yvelines";
 
-    var svg1 = d3.select("body")
-      .append("svg")
-      .attr("id", "colorlegend")
-      .attr("width", width)
-      .attr("height", 20);
+    var merged;
 
-    svg1.append("text")
-      .attr('id', 'textmax')
-      .style("fill", "black")
-      .attr("postion", "relative")
-      .style("font-weight", "bold")
-      .attr("text-anchor", "middle")
-      .attr('font-size', '8pt')
-      .attr("x", width / 2 + 162)
-      .attr("y", 12)
+    var t = d3.transition()
+      .duration(750)
+      .ease(d3.easeLinear);
 
-    svg1.append("text")
-      .attr("id", 'textmin')
-      .style("fill", "black")
-      .attr("postion", "relative")
-      .style("font-weight", "bold")
-      .attr("text-anchor", "middle")
-      .attr('font-size', '8pt')
-      .attr("x", width / 2 - 162)
-      .attr("y", 12)
+    var n = 2; //public,privé
 
-    var svg = d3.select("body")
-      .append("svg")
-      .attr("width", width)
-      .attr("height", height);
+    var is_stacked = true;
+    var is_changed = false;
 
-    var projection = d3.geoConicConformal().center([2.454071, 46.279229]).scale(2800)
-      .translate([width / 2, height / 2]);
+
+    var margin = {
+      top: 30,
+      bottom: 40,
+      left: 50,
+      right: 80
+    };
+
+    var width = (window.innerWidth ||
+      document.documentElement.clientWidth ||
+      document.body.clientWidth) / 2 - margin.left - margin.right;
+
+    var height = (window.innerHeight ||
+      document.documentElement.clientHeight ||
+      document.body.clientHeight) - 2 * margin.top - 2 * margin.bottom;
+
+    var filieres = ['TFC', 'S', 'ES', 'L']
+
+    var radios =
+      d3.select('#radios').selectAll('input[name="filiere"]').data(filieres);
+
+    var labels = radios.enter()
+      .append("label")
+      .append("input")
+      .on('change', function() {
+        renderValues(this.value);
+      })
+      .attr("type", "radio")
+      .attr("name", "brand")
+      .attr("value", function(d) {
+        return d;
+      })
+      /*.attr('checked', function(d) {
+        if (d === filieres[0]) {
+          return 'checked'
+        };
+      });*/
+
+    d3.selectAll("label")
+      .data(filieres)
+      .append("text")
+      .text(function(d) {
+        return d;
+      })
+      .style("font-family", "Arial")
+      .style("font-size", 12)
+    //.style("font-weight", "bold");
+
+    //Définition de nos trois SVG : carte choroplète, histogramme et nuage de points
+    var svg_carte = d3.select("#carte").attr('width', width + margin.left + margin.right).attr('height', height + 2 * margin.top + 2 * margin.bottom)
+
+    var svg_scatter = d3.select("#scatter")
+      .attr('width', width + margin.left + margin.right)
+      .attr('height', height / 2 + margin.top + margin.bottom)
+      .append("g")
+      .attr('id', 'scatterplot')
+      .attr("transform",
+        "translate(" + (margin.left) + "," + (margin.top) + ")");
+
+    var svg_histogramme = d3.select("#histogramme")
+      .attr('width', width + margin.left + margin.right)
+      .attr('height', height / 2 + margin.top + margin.bottom)
+      .append("g")
+      .attr('id', 'histogramme')
+      .attr("transform",
+        "translate(" + (margin.left + 30) + "," + (margin.top) + ")");
+
+    //Définition de notre path pour la carte de la France
+    var projection = d3.geoConicConformal().center([2.454071, 46.279229]).scale(Math.min(height*5.7,width*6.2))
+      .translate([(width + margin.left + margin.right) / 2, height / 2 + margin.top + margin.bottom]);
 
     var path = d3.geoPath() // d3.geo.path avec d3 version 3
       .projection(projection);
 
+    //Définition des tooltips associés à chaque visualisation graphique
+    var tooltip_carte = d3.select('body').append('div')
+      .attr('class', 'hidden tooltip');
 
-    d3.csv("GrippeFrance2014.csv", function(data) {
+    var tooltip_scatter_france = d3.select('body').append('div')
+      .attr('class', 'hidden tooltip');
 
-      d3.json("geo.json", function(json) {
-        svg.selectAll(".region")
+    var tooltip_scatter = d3.select('body').append('div')
+      .attr('class', 'hidden tooltip');
+    var dep_removed;
+
+    d3.csv("donnees_traitees_bac_2016.csv", function(data) {
+
+      d3.json("departements.json", function(json) {
+        svg_carte.selectAll(".departement")
           .data(json.features)
           .enter()
           .append("path")
-          .attr('class', 'region')
+          .attr('class', 'departement')
           .attr("d", path);
 
-        //Append a defs (for definition) element to your SVG
-        var defs = svg.append("defs");
-
-        //Append a linearGradient element to the defs and give it a unique id
-        var linearGradient = defs.append("linearGradient")
-          .attr("id", "linear-gradient");
-
-        //Set the color for the start (0%)
-        linearGradient.append("stop")
-          .attr("offset", "0%")
-          .attr("stop-color", "#FFCDD2"); //light blue
-
-        //Set the color for the end (100%)
-        linearGradient.append("stop")
-          .attr("offset", "100%")
-          .attr("stop-color", "#B71C1C"); //dark blue
-
-        //Draw the rectangle and fill with gradient
-        svg1.append("rect")
-          .attr("rx",5)
-          .attr("stroke","black")
-          .attr("width", 300)
-          .attr("height", 10)
-          .style("fill", "url(#linear-gradient)")
-          .attr("x", width / 2 - 150)
-          .attr('y', 3);
-
-        var tooltip = d3.select('body').append('div')
-          .attr('class', 'hidden tooltip');
-
-        dict = {}
-        //On initalise tout max, texte, slider à la semaine 1
-        var max = d3.max(data, function(d) {
-          return +d[Object.keys(data[0])[1]];
-        })
-
-        var min = d3.min(data, function(d) {
-          return +d[Object.keys(data[0])[1]];
-        })
-
-        d3.select("#slider").property("value", 1);
-        d3.select("#week").text("Semaine du " + Object.keys(data[0])[1]);
-
-        var colorScale = d3.scaleLinear().domain([0, max]).interpolate(d3.interpolateHcl).range(['#FFCDD2', '#B71C1C']);
-
-        function valueByWeek(numWeek) {
-          var max = d3.max(data, function(d) {
-            return +d[Object.keys(data[0])[numWeek]];
+        //Ajout de l'information (taux reussite & effectif) contenue dans le CSV dans notre JSON
+        //selon la filière sélectionnée
+        function getTauxEffectifFiliere(filiere) {
+          json.features.forEach(function(elt) {
+            elt.properties.taux_reussite = 0
+            elt.properties.effectif_total = 0
           })
-
-          var min = d3.min(data, function(d) {
-            return +d[Object.keys(data[0])[numWeek]];
-          })
-
-          colorScale = d3.scaleLinear().domain([0, max]).interpolate(d3.interpolateHcl).range(['#FFCDD2', '#B71C1C']);
-
           for (var i = 0; i < data.length; i++) {
             json.features.forEach(function(element) {
-              if (element.properties.nom == data[i].region) {
-                element.properties.value = data[i][Object.keys(data[0])[numWeek]]
+              if (element.properties.code == data[i].Departement && data[i]["Filiere"] == filiere) {
+                element.properties.taux_reussite += +data[i]["Taux_reussite"] * +data[i]["Effectif"]
+                element.properties.effectif_total += +data[i]["Effectif"]
               }
             })
-            //Au départ, j'ai utilisé un dictionnaire pour stocker un calcul intermédiaire, pour chaque région la somme des semaines de novembre
-            //Avec un if sur les clés du tableau csv, qui s'ajoutent dans la variable sum si elles contiennent "11/14"
-            //J'ai gardé ce dict intermédiaire pour la fin du projet mais il n'est pas utile.
-
-            sum = 0
-            sum += parseFloat(data[i][Object.keys(data[i])[numWeek]])
-            dict[data[i]["region"]] = sum
           }
-          svg1.select("#textmax")
-            .text(max)
+          json.features.forEach(function(elt) {
+            elt.properties.taux_reussite = Math.floor(elt.properties.taux_reussite / elt.properties.effectif_total * 10) / 10
+          })
+        }
 
-          svg1.select("#textmin")
-            .text(min)
+        getTauxEffectifFiliere(filiere);
 
-          Draw();
-        };
+        //Définition du gradient de couleur pour la carte choroplète et les nuages de points France
+        //en fonction du min et max du taux de réussite pour la filière sélectionnée
+        //calcul min max effectif pour les axes du nuage de points
+        function init() {
+          svg_scatter.selectAll(".point").remove();
+
+          min_eff = d3.min(json.features, function(d) {
+            return +d.properties.effectif_total;
+          })
+          max_eff = d3.max(json.features, function(d) {
+            return +d.properties.effectif_total;
+          })
+
+          min_reussite = d3.min(json.features, function(d) {
+            return +d.properties.taux_reussite;
+          })
+
+          max_reussite = d3.max(json.features, function(d) {
+            return +d.properties.taux_reussite;
+          });
+
+          var colorScale = d3.scaleLinear().domain([min_reussite, max_reussite]).interpolate(d3.interpolateHcl).range(['#FFEBEE', '#B71C1C']);
+
+			var legend_width = 140, legend_height = 200;
+
+			var key = d3.select("body")
+				.append("svg")
+				.attr("width", legend_width)
+				.attr("height", legend_height)
+				.attr("class", "legend")
 
 
-        valueByWeek(1);
-        d3.select("#slider").on("input", function(d) {
-          // adjust the text on the range slider
-          d3.select("#week").text("Semaine du " + Object.keys(data[0])[+this.value]);
-          valueByWeek(+this.value)
-        });
+			var legend = key.append("defs")
+				.append("svg:linearGradient")
+				.attr("id", "gradient")
+				.attr("x1", "100%")
+				.attr("y1", "0%")
+				.attr("x2", "100%")
+				.attr("y2", "100%")
+				.attr("spreadMethod", "pad")
 
+			legend.append("stop")
+				.attr("offset", "0%")
+				.attr("stop-color", '#B71C1C')
+				.attr("stop-opacity", 1);
+				
+			legend.append("stop")
+				.attr("offset", "100%")
+				.attr("stop-color", "#FFEBEE")
+				.attr("stop-opacity", 1);
 
-        function Draw() {
+			key.append("rect")
+				.attr("width", 20)
+				.attr("height", legend_height - 20)
+				.style("fill", "url(#gradient)")
+				.attr("transform", "translate(0,10)");
 
+			var y = d3.scaleLinear()
+				.range([legend_height - 20, 0])
+				.domain([min_reussite, max_reussite]);
 
-          svg.selectAll(".region")
+			var yAxis = d3.axisRight(y);
+
+			d3.selectAll('#yAxis_legend').remove();
+			key.append("g")
+				.attr("id", "yAxis_legend")
+				.attr("transform", "translate(22,10)")
+				.call(yAxis)
+
+          //On initialise la carte choroplèthe avec les données ajoutées plus haut
+          //ainsi que tous les events listeners MouseOver,MouseMove, MouseOut, onClick
+
+          svg_carte.selectAll(".departement")
             .style("fill", function(d) {
-
-              return colorScale(d.properties.value)
-
+              return colorScale(d.properties.taux_reussite)
             })
             .on('mouseover', function(d) {
-              d3.select(this).style("fill", function(d) {
-
-                  return colorScale(d.properties.value)
-
-                })
+              d3.select(this).style("fill", '#BDBDBD')
                 .style("opacity", 0.5)
             })
             .on('mousemove', function(d) {
-              var mouse = d3.mouse(svg.node()).map(function(d) {
+              var mouse = d3.mouse(svg_carte.node()).map(function(d) {
                 return parseInt(d);
               });
-              tooltip.classed('hidden', false)
+              tooltip_carte.classed('hidden', false)
                 .attr('style', 'left:' + (mouse[0] + 5) +
                   'px; top:' + (mouse[1] - 5) + "px;")
-                .html("<b>" + d.properties.nom + "</b>" + ':\n' + dict[d.properties.nom]);
+                .html(d.properties.nom +
+                  "<br/>" + d.properties.taux_reussite + "%" + " Success rate" +
+                  "<br/>" + d.properties.effectif_total + " Students");
             })
             .on('mouseout', function() {
-              tooltip.classed('hidden', true);
+              tooltip_carte.classed('hidden', true);
               d3.select(this).style("fill", function(d) {
 
-                return colorScale(d.properties.value)
+                return colorScale(d.properties.taux_reussite)
 
               }).style("opacity", 1)
+            })
+            .on("click", function(d) {
+              getScatterDepartement(d.properties.code, filiere)
+              initHisto(d.properties.code)
+              //console.log(dep_removed)
+              //d3.select(this).style("stroke", dictColorDep[d.properties.code]).style('stroke-width', '2px')
+
+            })
+
+	          //On initialise le Titre de la carte choroplèthe
+	          d3.select('#labelMap').remove();
+	          svg_carte.append('text')
+	            .attr('id', 'labelMap')
+	            .attr("x", (width + margin.left + margin.right) / 2)
+	            .attr("y", 30)
+	            .attr("text-anchor", "middle").text("Success rate at the BAC in 2016 in track " + filiere).style("fill", "black")
+	            .style("font-family", "Arial")
+	            .style("fill", '#CFD8DC')
+	            .style("font-size", '1em')
+	            .style("font-weight", 'bold');
+
+          //On initialise le Titre du nuage de points
+          d3.select('#labelScatter').remove();
+          d3.select("#scatter").append('text')
+            .attr('id', 'labelScatter')
+            .attr("x", (width + margin.left + margin.right) / 2)
+            .attr("y", 15)
+            .attr("text-anchor", "middle").text("Success rate by department according to number of employees in track " + filiere).style("fill", "black")
+            .style("font-family", "Arial")
+            .style("fill", '#CFD8DC')
+            .style("font-color", "white")
+            .style("font-size", '0.8em')
+            .style("font-weight", 'bold');
+
+          //Définition des échelles pour les axes x et y
+          var xScale = d3.scaleLinear()
+            .domain([min_eff, max_eff])
+            .range([0, width]);
+
+          var yScale = d3.scaleLinear()
+            .domain([min_reussite, max_reussite])
+            .range([height / 2, 0]);
+
+          //Add the x Axis and its label
+          svg_scatter.append("g")
+            .attr('id', 'xAxis')
+            .attr("transform", "translate(0," + height / 2 + ")")
+            .call(d3.axisBottom(xScale));
+
+          svg_scatter.append("text")
+            .attr('id', 'xAxisLabel')
+            .attr("transform",
+              "translate(" + (width / 2) + " ," +
+              (height / 2 + margin.top) + ")")
+            .style("text-anchor", "middle")
+            .style("font-size", '0.8em')
+            .style('font-weight', 'bold')
+            .style("fill", '#CFD8DC')
+            .attr("dy", "0.2em")
+            .text("Number of students");;
+
+          // Add the y Axis and its label
+          svg_scatter.append("g")
+            .attr('id', 'yAxis')
+            .call(d3.axisLeft(yScale));
+
+          svg_scatter.append("text")
+            .attr('id', 'yAxisLabel')
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0 - margin.left)
+            .attr("x", 0 - (height / 4))
+            .attr("dy", "1.5em")
+            .style("text-anchor", "middle")
+            .style('fill', '#CFD8DC')
+            .style('font-weight', 'bold')
+            .text("Success rate (%)")
+            .style("font-size", '0.8em');
+
+          svg_scatter.selectAll("#xAxis")
+            .call(d3.axisBottom(xScale));
+
+          svg_scatter.selectAll("#yAxis")
+            .call(d3.axisLeft(yScale));
+
+          //On initialise les points du nuage avec les données ajoutées sur le json
+          //qui dépendent de la filière sélectionnée. On a une distribution des départements
+          svg_scatter.append('g').attr('id', 'france').selectAll("#scatterplot")
+            .data(json.features)
+            .enter()
+            .append("svg:circle")
+            .style("stroke", function(d) {
+              return colorScale(d.properties.taux_reussite)
+            })
+            .style("fill", function(d) {
+              return colorScale(d.properties.taux_reussite)
+            })
+            .style("stroke-width", 2)
+            .attr("cx", function(d) {
+              return xScale(d.properties.effectif_total);
+            })
+            .attr("cy", function(d) {
+              return yScale(d.properties.taux_reussite);
+            })
+            .attr("r", 3)
+            .attr('class', 'point')
+
+          //Ajout des events listeners sur le nuage de point
+          svg_scatter.selectAll(".point")
+            .on('mouseover', function(d) {
+              d3.select(this).style("fill", '#BDBDBD')
+                .style("opacity", 0.5)
+            })
+            .on('mousemove', function(d) {
+              var mouse = d3.mouse(svg_carte.node()).map(function(d) {
+                return parseInt(d);
+              });
+              tooltip_scatter_france.classed('hidden', false)
+                .attr('style', 'left:' + mouse[0] +
+                  'px; top:' + mouse[1] + "px;")
+                .html(depFr[d.properties.code] + "</br>" + d.properties.taux_reussite + "% success rate");
+            })
+            .on('mouseout', function() {
+              tooltip_scatter_france.classed('hidden', true);
+              d3.select(this).style("stroke", function(d) {
+                return colorScale(d.properties.taux_reussite)
+              }).style("opacity", 1).style("fill", 'white')
             });
+
         }
 
-        /*svg.selectAll("text")
-          .data(json.features)
-          .enter()
-          .append("text")
-          .text(function(d, i) {
-            return dict[d.properties.nom]
-          })
-          .attr("x", function(d) {
-            return path.centroid(d)[0];
-          })
-          .attr("y", function(d) {
-            return path.centroid(d)[1];
-          })
-          .attr("text-anchor", "middle")
-          .attr('font-size', '6pt');*/
+        init();
+        var data_reshaped;
+        departement = null;
 
+        function initHisto(departement) {
+
+          colorLegend = ["#1e90ff", "#ffd700"]
+          labelLegend = ["Public","Private"]
+
+          svg_histogramme.select('#rects').remove();
+          svg_histogramme.select('#yAxisLabel').remove();
+          d3.select('#histogramme').select('#labelHisto').remove();
+
+          var legend_hist = d3.select("#histogramme").append("g")
+            .attr("class", "legend")
+            .attr('id', 'legend_hist')
+            .attr('transform', 'translate(0,' + margin.top + ')')
+
+            legend_hist.selectAll('rect')
+              .data(colorLegend)
+              .enter()
+              .append("rect")
+              .attr("x", width + margin.left)
+              .attr("y", function(d, i) {
+                return -20 + i * 20;
+              })
+              .attr("width", 10)
+              .attr("height", 10)
+              .style("fill", function(d, i) {
+                return colorLegend[i];
+              })
+
+            legend_hist.selectAll('text')
+              .data(labelLegend)
+              .enter()
+              .append("text")
+              .attr("x", width + margin.left + 11)
+              .attr("y", function(d, i) {
+                return -20 + i * 20 + 9;
+              })
+              .style("font-size", '0.8em')
+              .style('fill', '#CFD8DC')
+              .text(function(d) {
+                return d;
+              });
+
+          d3.select("#histogramme").append('text')
+            .attr('id', 'labelHisto').attr("x", (width + margin.left + margin.right) / 2)
+            .attr("y", 20)
+            .attr("text-anchor", "middle").style("fill", "black")
+            .style("font-family", "Arial")
+            .style("font-size", '0.8em')
+            .style("font-weight", 'bold')
+
+          if (departement == null) {
+            d3.select("#labelHisto")
+              .text("National Scale")
+              .style("fill", "#CFD8DC")
+
+            data_filtered_histo = data.filter(function(d) {
+              if (d["Filiere"] != 'TFC' & d["Filiere"] != 'TMD') {
+                return d;
+              }
+            })
+          } else {
+            d3.select("#labelHisto")
+              .text(depFr[departement])
+              .style("fill", "#CFD8DC")
+            data_filtered_histo = data.filter(function(d) {
+              if ((d["Filiere"] != 'TFC' & d["Filiere"] != 'TMD') & d['Departement'] == departement) {
+                return d;
+              }
+            })
+          }
+
+          data_reshaped = d3.nest()
+            .key(function(d) {
+              return d['Filiere'];
+            })
+            .sortKeys(d3.ascending)
+            .key(function(d) {
+              return d['Secteur'];
+            })
+            .rollup(function(d) {
+              return {
+                'taux_reussite': d3.mean(d, function(g) {
+                  return +g['Taux_reussite']
+                }),
+                'effectif': d3.sum(d, function(g) {
+                  return +g['Effectif']
+                })
+              }
+            })
+            .entries(data_filtered_histo);
+
+          var m = data_reshaped.length
+
+          dataFormat = d3.range(m).map(function(index) {
+            return d3.range(n).map(function(i) {
+              if (data_reshaped[index].values[i] == null || typeof data_reshaped[index] == 'undefined') {
+                return 0
+              } else {
+                return Math.floor(data_reshaped[index].values[i].value.effectif)
+              }
+            });
+          })
+
+
+          dataFormat_taux = d3.range(m).map(function(index) {
+            return d3.range(n).map(function(i) {
+              if (data_reshaped[index].values[i] == null || data_reshaped[index] == null) {
+                return 0
+              } else {
+                return Math.floor(data_reshaped[index].values[i].value.taux_reussite * 10) / 10
+              } //data_reshaped[index].values[i].value.avg_stock_value * 10) / 10
+            });
+          })
+
+          data_stacked = d3.stack().keys(d3.range(n))(dataFormat)
+
+          var merged_2 = [].concat.apply([], [].concat.apply([], data_stacked));
+
+          var max_effectif = d3.max(merged_2, function(d, index) {
+            return d
+          });
+
+          var max_taux_reussite = d3.max(data, function(d, index) {
+            return +d.Taux_reussite
+          }); //100
+
+          var y = d3.scaleLinear()
+            .domain([0, max_effectif])
+            .range([height / 2, 0])
+            .nice();
+
+          var y_bis = d3.scaleLinear()
+            .domain([100, 85])
+            .rangeRound([height / 2, 0])
+            .nice();
+
+          var y_bis_bis = d3.scaleLinear()
+            .domain([85, 100])
+            .rangeRound([height / 2, 0])
+            .nice();
+
+          var x = d3.scaleBand()
+            .rangeRound([0, width])
+            .paddingInner(0.01)
+            .align(0.1)
+            .domain(d3.range(m));
+
+          var z = d3.scaleOrdinal()
+            .range(colorLegend);
+
+          //Add the x Axis and its label
+          tickLabels = []
+          data_reshaped.forEach(function(filiere) {
+            tickLabels.push(filiere.key)
+          })
+
+          svg_histogramme.append("g")
+            .attr('id', 'xAxis')
+            .attr("transform", "translate(0," + height / 2 + ")")
+            .call(d3.axisBottom(x).ticks(tickLabels.length).tickFormat(function(d, i) {
+              return tickLabels[i];
+            }));
+
+          svg_histogramme.append("text")
+            .attr('id', 'xAxisLabel')
+            .attr("transform",
+              "translate(" + (width / 2) + " ," +
+              (height / 2 + margin.top) + ")")
+            .style("text-anchor", "middle")
+            .style("font-size", '0.8em')
+            .attr("dy", "0.2em")
+            .text("High School Program")
+            .style("fill", "#CFD8DC")
+            .style('font-weight', 'bold');
+
+          // Add the y Axis and its label
+          svg_histogramme.append("g")
+            .attr('id', 'yAxis')
+            .call(d3.axisLeft(y));
+
+          svg_histogramme.append("text")
+            .attr('id', 'yAxisLabel')
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0 - margin.left - 20)
+            .attr("x", 0 - (height / 4))
+            .attr("dy", "1.5em")
+            .style("text-anchor", "middle")
+            .text("Number of students")
+            .style("fill", "#CFD8DC")
+            .style("font-size", '0.8em')
+            .style('font-weight', 'bold');
+
+          svg_histogramme.selectAll("#xAxis")
+            .call(d3.axisBottom(x).ticks(tickLabels.length).tickFormat(function(d, i) {
+              return tickLabels[i];
+            }));
+          svg_histogramme.selectAll("#yAxis")
+            .call(d3.axisLeft(y));
+
+          var bar_group = svg_histogramme.append("g").attr('id', 'rects').selectAll("g")
+            .data(d3.stack().keys(d3.range(n))(dataFormat))
+            .enter().append("g")
+            .style("fill", function(d) {
+              return z(d.key);
+            })
+            .selectAll("rect")
+            .data(function(d) {
+              return d;
+            })
+            .enter()
+
+          bar_group.append("rect")
+            .attr("x", function(d, i) {
+              return x(i);
+            })
+            .attr("y", function(d) {
+              return y(d[1]);
+            })
+            .attr("height", function(d) {
+              return y(d[0]) - y(d[1]);
+            })
+            .attr("width", x.bandwidth())
+
+
+          svg_histogramme.select("#rects").selectAll("g").on('click', function() {
+            if (is_stacked) {
+              svg_histogramme.select('#yAxisLabel').text("Success rate (%)")
+                .style("fill", "#CFD8DC").style('font-weight', 'bold');
+              svg_histogramme.selectAll("#yAxis")
+                .call(d3.axisLeft(y_bis_bis));
+
+              svg_histogramme.select("#rects").selectAll("g").data(d3.stack().keys(d3.range(n))(dataFormat_taux)).each(function(d, index) {
+
+                d3.select(this).selectAll("rect").data(function(d) {
+                  return d;
+                }).each(function(e, i) {
+
+                  d3.select(this).transition(t)
+                    .attr("x", function() {
+                      return x(i) + (index) * x.bandwidth() / 2 + x.bandwidth() / 8
+                    })
+                    .attr("width", function() {
+                      return x.bandwidth() / 4
+                    })
+                    .transition(t).delay(500)
+                    .attr("y", function(d) {
+                      return height / 2 - y_bis(d[1] - d[0]);
+                    })
+                    .attr("height", function(d) {
+                      return y_bis(d[1] - d[0]);
+                    })
+
+                })
+              })
+            } else {
+              svg_histogramme.select('#yAxisLabel').text("Number of students").style("fill", "#CFD8DC").style('font-weight', 'bold')
+
+              svg_histogramme.selectAll("#yAxis")
+                .call(d3.axisLeft(y));
+              svg_histogramme.select("#rects").selectAll("g").data(d3.stack().keys(d3.range(n))(dataFormat)).each(function(d, index) {
+
+                d3.select(this).selectAll("rect").data(function(d) {
+                  return d;
+                }).each(function(e, i) {
+
+                  d3.select(this).transition()
+                    .attr("y", function(d) {
+
+                      return y(d[1]);
+                    })
+                    .attr("height", function(d) {
+                      return y(d[0]) - y(d[1])
+                    })
+                    .transition().delay(500)
+                    .attr("width", function() {
+                      return x.bandwidth()
+                    })
+                    .attr("x", function() {
+                      return x(i)
+                    })
+
+                })
+              })
+
+            }
+
+            is_stacked = !is_stacked;
+          })
+        }
+
+        initHisto();
+
+
+
+        //Initialisation des variables qui vont permettre de gérer l'interaction carte/nuage de points
+        var data_filtered_total = [];
+        var colorSet_init = ["#ff00ff", "#00BFFF", "#FF7F50", "#FFD700", "#32CD32"]
+        var dep_clicked = []
+        var colorSet = []
+        var dictColorDep = {}
+
+        //Add legend for the selected department
+        var legend = d3.select("#scatter").append("g")
+          .attr("class", "legend")
+          .attr('id', 'legend')
+          .attr('transform', 'translate(0,' + margin.top + ')')
+
+        d3.select("#radios").selectAll("input").on("change", function(d) {
+          filiere = d
+          d3.select('#legend').selectAll('rect').remove();
+          d3.select('#legend').selectAll('text').remove();
+          d3.select('#scatterplot').selectAll('circle').remove()
+          getTauxEffectifFiliere(filiere);
+          init();
+        })
+
+        //Fonction qui filtre les données du CSV suivant le département sélectionné sur la carte choroplète
+        //et qui les affiche
+        var fil = null
+
+        function getScatterDepartement(dep, filiere) {
+
+          if (fil == null){
+            fil = filiere
+          } else if (fil != filiere) {
+            merged.length = 0;
+            data_filtered_total.length = 0;
+            dep_clicked.length = 0;
+            colorSet.length = 0;
+            fil = filiere
+          }
+
+          var i = dep_clicked.indexOf(dep)
+
+
+          d3.select("#scatter").select('#labelScatter').remove()
+
+          data_filtered = data.filter(function(d) {
+            if (d["Filiere"] == filiere & d["Departement"] == dep) {
+              return d;
+            }
+          })
+
+          d3.select("#scatter").append('text')
+            .attr('id', 'labelScatter').attr("x", (width + margin.left + margin.right) / 2)
+            .attr("y", 15)
+            .attr("text-anchor", "middle").style("fill", "black")
+            .style("font-family", "Arial")
+            .style("font-size", '0.8em')
+            .style("font-weight", 'bold')
+            .style("fill", "#CFD8DC")
+            .style("font-style", 'italic').text("Success rate per secondary school in track " + filiere + " as a function of enrolment")
+
+          if (dep_clicked.includes(dep) && dep_clicked.length > 1) {
+          	data_filtered_total.splice(i,1)
+          } else if (data_filtered_total.length < 5 & !dep_clicked.includes(dep)) {
+            data_filtered_total.push(data_filtered);
+          } else if (!dep_clicked.includes(dep)) {
+            data_filtered_total.shift()
+            data_filtered_total.push(data_filtered);
+          }
+          merged = [].concat.apply([], data_filtered_total);
+          //console.log('function', merged)
+
+          min_eff = d3.min(merged, function(d) {
+            return +d["Effectif"];
+          })
+          max_eff = d3.max(merged, function(d) {
+            return +d["Effectif"];
+          })
+
+          min_reussite = d3.min(merged, function(d) {
+            return +d["Taux_reussite"];
+          })
+
+          max_reussite = d3.max(merged, function(d) {
+            return +d["Taux_reussite"];
+          })
+
+          var xScale = d3.scaleLinear()
+            .domain([min_eff, max_eff])
+            .range([0, width]);
+
+          var yScale = d3.scaleLinear()
+            .domain([min_reussite, max_reussite])
+            .range([height / 2, 0]);
+
+          svg_scatter.selectAll("#xAxis")
+            .call(d3.axisBottom(xScale));
+
+          svg_scatter.selectAll("#yAxis")
+            .call(d3.axisLeft(yScale));
+
+          if (dep_clicked.includes(dep) && dep_clicked.length > 1) {
+          	dep_clicked.splice(i,1)
+          	dep_removed = dep
+          	delete dictColorDep[dep_removed];
+            var color_removed = colorSet.splice(i,1)
+            //colorSet.push(color_removed)
+          } else if (!dep_clicked.includes(dep) & dep_clicked.length < 5) {
+            dep_clicked.push(dep)
+            dictColorDep[dep] = colorSet_init.find( function( el ) {
+            	if(!Object.values(dictColorDep).includes(el)) { 
+            		return el
+            	}
+			} );
+            colorSet.push(dictColorDep[dep])
+          } else if (!dep_clicked.includes(dep)) {
+            dep_removed = dep_clicked.shift();
+            delete dictColorDep[dep_removed];
+            dep_clicked.push(dep)
+            var color_removed = colorSet.shift()
+            colorSet.push(color_removed)
+            dictColorDep[dep] = color_removed
+          }
+
+          svg_scatter.select('#france').selectAll(".point").remove();
+
+          svg_scatter.selectAll(".point").remove();
+
+          svg_scatter.selectAll(".point").data(merged)
+            .enter()
+            .append("svg:circle")
+            .attr("cx", function(d) {
+              return xScale(d["Effectif"]);
+            })
+            .attr("cy", function(d) {
+              return yScale(d["Taux_reussite"]);
+            })
+            .attr("r", 3)
+            .attr('class', 'point')
+            .attr("stroke", function(d) {
+              return dictColorDep[d["Departement"]];
+            })
+            .attr("stroke-width", 2)
+            .attr("fill", function(d) {
+              return dictColorDep[d["Departement"]];
+            })
+
+          legend.selectAll('rect').remove();
+          legend.selectAll('rect')
+            .data(colorSet)
+            .enter()
+            .append("rect")
+            .attr("x", width + margin.left)
+            .attr("y", function(d, i) {
+              return -20 + i * 20;
+            })
+            .attr("width", 10)
+            .attr("height", 10)
+            .style("fill", function(d, i) {
+              return colorSet[i];
+            })
+          legend.selectAll('text').remove()
+          legend.selectAll('text')
+            .data(dep_clicked)
+            .enter()
+            .append("text")
+            .attr("x", width + margin.left + 11)
+            .attr("y", function(d, i) {
+              return -20 + i * 20 + 9;
+            })
+            .style("font-size", '0.8em')
+            .style('fill', '#CFD8DC')
+            .text(function(d, i) {
+              var str = depFr[dep_clicked[i]];
+              if (str.length > 10) str = str.substring(0, 10) + '..';
+              return str;
+            });
+
+          svg_scatter.selectAll(".point")
+            .on('mouseover', function(d) {
+              d3.select(this).style("fill", '#BDBDBD')
+                .style("opacity", 0.5)
+            })
+            .on('mousemove', function(d) {
+              var mouse = d3.mouse(svg_carte.node()).map(function(d) {
+                return parseInt(d);
+              });
+              tooltip_scatter.classed('hidden', false)
+                .attr('style', 'left:' + (mouse[0] + 5) +
+                  'px; top:' + (mouse[1] - 5) + "px;")
+                .html(d.Etablissement + "</br>" + d.Taux_reussite + "% Success rate");
+            })
+            .on('mouseout', function() {
+              tooltip_scatter.classed('hidden', true);
+              d3.select(this).style("stroke", function(d, i) {
+                return dictColorDep[d["Departement"]]
+
+              }).style("fill", 'white').style("opacity", 1)
+            });
+          return !is_changed;
+        }
       });
     });
   </script>
